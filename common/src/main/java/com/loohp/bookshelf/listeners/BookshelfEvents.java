@@ -364,9 +364,7 @@ public class BookshelfEvents implements Listener {
             putting = true;
         }
         if (event.getAction().equals(InventoryAction.HOTBAR_MOVE_AND_READD) || event.getAction().equals(InventoryAction.HOTBAR_SWAP)) {
-            int slot = event.getRawSlot();
-            int inventorySize = event.getView().getTopInventory().getSize();
-            if (slot < inventorySize) {
+            if (clickedBookshelfSlot) {
                 putting = true;
             }
         }
