@@ -73,6 +73,10 @@ import java.util.Map;
 
 public class BookshelfEvents implements Listener {
 
+    private static boolean isWhitelistedBookshelfItem(ItemStack item) {
+        return item == null || item.getType().equals(Material.AIR) || Bookshelf.whitelist.contains(item.getType().toString().toUpperCase());
+    }
+
 /*	
 	@EventHandler
 	public void onBlockUpdate(BlockPhysicsEvent event) {
@@ -303,12 +307,22 @@ public class BookshelfEvents implements Listener {
             return;
         }
 
+        int slot = event.getRawSlot();
+        int inventorySize = event.getView().getTopInventory().getSize();
+        boolean clickedBookshelfSlot = slot >= 0 && slot < inventorySize;
+        if (event.getClick().name().equals("SWAP_OFFHAND") && clickedBookshelfSlot) {
+            ItemStack offhand = player.getInventory().getItemInOffHand();
+            if (!isWhitelistedBookshelfItem(offhand)) {
+                event.setCancelled(true);
+                return;
+            }
+            return;
+        }
+
         if (event.getAction().equals(InventoryAction.HOTBAR_MOVE_AND_READD) || event.getAction().equals(InventoryAction.HOTBAR_SWAP)) {
-            int slot = event.getRawSlot();
-            int inventorySize = event.getView().getTopInventory().getSize();
-            if (slot < inventorySize) {
+            if (clickedBookshelfSlot) {
                 if (event.getWhoClicked().getInventory().getItem(event.getHotbarButton()) != null) {
-                    if (!Bookshelf.whitelist.contains(event.getWhoClicked().getInventory().getItem(event.getHotbarButton()).getType().toString().toUpperCase())) {
+                    if (!isWhitelistedBookshelfItem(event.getWhoClicked().getInventory().getItem(event.getHotbarButton()))) {
                         event.setCancelled(true);
                         return;
                     }
@@ -323,7 +337,7 @@ public class BookshelfEvents implements Listener {
 
                 if (clickedOn != null) {
                     if (!clickedOn.getType().equals(Material.AIR)) {
-                        if (!Bookshelf.whitelist.contains(clickedOn.getType().toString().toUpperCase())) {
+                        if (!isWhitelistedBookshelfItem(clickedOn)) {
                             event.setCancelled(true);
                             return;
                         }
@@ -337,7 +351,7 @@ public class BookshelfEvents implements Listener {
 
                 if (onCursor != null) {
                     if (!onCursor.getType().equals(Material.AIR)) {
-                        if (!Bookshelf.whitelist.contains(onCursor.getType().toString().toUpperCase())) {
+                        if (!isWhitelistedBookshelfItem(onCursor)) {
                             event.setCancelled(true);
                             return;
                         }
